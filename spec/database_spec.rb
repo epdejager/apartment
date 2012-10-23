@@ -17,6 +17,10 @@ describe Apartment::Database do
         subject.reload!
       end
 
+      it "should be a Mysql2 connection" do
+        assert ActiveRecord::Base.connection.class == ActiveRecord::ConnectionAdapters::Mysql2Adapter
+      end
+
       it "should load mysql adapter" do
         subject.adapter
         Apartment::Adapters::Mysql2Adapter.should be_a(Class)
@@ -43,6 +47,10 @@ describe Apartment::Database do
     describe "#adapter" do
       before do
         subject.reload!
+      end
+
+      it "should be a PostgreSQL connection" do
+        assert ActiveRecord::Base.connection.class == ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
       end
 
       it "should load postgresql adapter" do
