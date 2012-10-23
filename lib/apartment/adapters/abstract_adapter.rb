@@ -142,6 +142,8 @@ module Apartment
             "#{Rails.env}_#{database}"
           elsif Apartment.append_environment
             "#{database}_#{Rails.env}"
+          else
+            database
           end
         else
           database
