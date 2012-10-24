@@ -44,7 +44,7 @@ namespace :postgres do
 
   desc 'Build the PostgreSQL test databases'
   task :build_db do
-    %x{ createdb -E UTF8 #{pg_config['database']} -Upostgres } rescue "test db already exists"
+    %x{ createdb -E UTF8 #{pg_config['database']} -U#{pg_config['username']} } rescue "test db already exists"
     ActiveRecord::Base.establish_connection pg_config
     ActiveRecord::Migrator.migrate('spec/dummy/db/migrate')
   end
@@ -52,7 +52,17 @@ namespace :postgres do
   desc "drop the PostgreSQL test database"
   task :drop_db do
     puts "dropping database #{pg_config['database']}"
-    %x{ dropdb #{pg_config['database']} -Upostgres }
+    %x{ dropdb #{pg_config['database']} -U#{pg_config['username']} }
+  end
+
+  desc "drop PostgreSQL test databases"
+  task :drop_test_dbs do
+    ActiveRecord::Base.establish_connection pg_config
+    databases = ActiveRecord::Base.connection.execute("SELECT datname FROM pg_database WHERE datname LIKE 'db%';").collect{|row| row['datname']}
+    databases.each do |database|
+      puts "dropping database #{database}"
+      %x{ dropdb #{database} -U#{pg_config['username']} }
+    end
   end
 
 end
@@ -63,7 +73,7 @@ namespace :mysql do
 
   desc 'Build the MySQL test databases'
   task :build_db do
-    %x{ mysqladmin -u root create #{my_config['database']} } rescue "test db already exists"
+    %x{ mysqladmin -u#{my_config['username']} -p#{my_config['password']} create #{my_config['database']} } rescue "test db already exists"
     ActiveRecord::Base.establish_connection my_config
     ActiveRecord::Migrator.migrate('spec/dummy/db/migrate')
   end
@@ -71,7 +81,17 @@ namespace :mysql do
   desc "drop the MySQL test database"
   task :drop_db do
     puts "dropping database #{my_config['database']}"
-    %x{ mysqladmin -u root drop #{my_config['database']} --force}
+    %x{ mysqladmin -u#{my_config['username']} -p#{my_config['password']} drop #{my_config['database']} --force}
+  end
+
+  desc "drop MySQL test databases"
+  task :drop_test_dbs do
+    ActiveRecord::Base.establish_connection my_config
+    databases = ActiveRecord::Base.connection.execute("SELECT schema_name FROM information_schema.schemata WHERE schema_name LIKE 'db%';").collect{|row| row['schema_name']}
+    databases.each do |database|
+      puts "dropping database #{database}"
+      %x{ mysqladmin -u#{my_config['username']} -p#{my_config['password']} drop #{database} --force}
+    end
   end
 
 end
