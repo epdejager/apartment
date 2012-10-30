@@ -151,4 +151,28 @@ describe Apartment::Database do
     end
 
   end
+
+  context "using mssql" do
+    # See apartment.yml file in dummy app config
+
+    let(:config){ Apartment::Test.config['connections']['mssql'].symbolize_keys }
+
+    before do
+      ActiveRecord::Base.establish_connection config
+      Apartment::Test.load_schema   # load the Rails schema in the dbo db schema
+      subject.stub(:config).and_return config   # Use mssql database config for this test
+    end
+
+    describe "#adapter" do
+      before do
+        subject.reload!
+      end
+
+      it "should load mssql adapter" do
+        subject.adapter
+        Apartment::Adapters::SqlserverAdapter.should be_a(Class)
+      end
+
+    end
+  end
 end

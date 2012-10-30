@@ -24,7 +24,7 @@ task :default => :spec
 
 namespace :db do
   namespace :test do
-    task :prepare => %w{postgres:drop_db postgres:build_db mysql:drop_db mysql:build_db}
+    task :prepare => %w{postgres:drop_db postgres:build_db mysql:drop_db mysql:build_db mssql:drop_db mssql:build_db}
   end
 
   desc "copy sample database credential files over if real files don't exist"
@@ -73,6 +73,26 @@ namespace :mysql do
     puts "dropping database #{my_config['database']}"
     %x{ mysqladmin -u #{my_config['username']} drop #{my_config['database']} --force}
   end
+end
+
+namespace :mssql do
+  require 'active_record'
+  require "#{File.join(File.dirname(__FILE__), 'spec', 'support', 'config')}"
+
+  desc 'Build the SqlServer test databases'
+  task :build_db do
+    %x{ sqsh -S #{mssql_config['dataserver']} -U #{mssql_config['username']} -P #{mssql_config['password']} -C 'CREATE DATABASE [#{mssql_config['database']}];' } rescue "test db already exists"
+    # %x{ sqsh -S #{mssql_config['host']}:#{mssql_config['port']} -U #{mssql_config['username']} -P #{mssql_config['password']} -C 'CREATE DATABASE [#{mssql_config['database']}];' } rescue "test db already exists"
+    ActiveRecord::Base.establish_connection mssql_config
+    ActiveRecord::Migrator.migrate('spec/dummy/db/migrate')
+  end
+
+  desc "drop the SqlServer test database"
+  task :drop_db do
+    puts "dropping database #{mssql_config['database']}"
+    %x{ sqsh -S #{mssql_config['dataserver']} -U #{mssql_config['username']} -P #{mssql_config['password']} -C 'DROP DATABASE [#{mssql_config['database']}];' }
+    # %x{ sqsh -S #{mssql_config['host']}:#{mssql_config['port']} -U #{mssql_config['username']} -P #{mssql_config['password']} -C 'DROP DATABASE [#{mssql_config['database']}];' }
+  end
 
 end
 
@@ -87,4 +107,8 @@ end
 
 def my_config
   config['mysql']
+end
+
+def mssql_config
+  config['mssql']
 end

@@ -12,3 +12,12 @@ connections:
     database: apartment_mysql_test
     username: root
     password:
+
+  mssql:
+    adapter: sqlserver
+    mode: dblib
+    dataserver: localhost\sql2008
+    database: apartment_sqlserver_test
+    username: apartment
+    password: P@ssword
+    timeout: 5000
