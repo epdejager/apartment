@@ -30,6 +30,36 @@ describe Apartment::Migrator do
 
     context "using schemas" do
 
+      describe "#create" do
+        let(:new_schema_name){ Apartment::Test.next_db }
+
+        after do
+          Apartment::Test.drop_schema(new_schema_name)
+        end
+
+        it "should create db" do
+          Apartment::Database.adapter.should_receive(:create)
+          Apartment::Migrator.create(new_schema_name)
+        end
+      end
+
+      describe "#drop" do
+        let(:existing_schema_name){ Apartment::Test.next_db }
+
+        before do
+          Apartment::Database.create(existing_schema_name)
+        end
+
+        after do
+          Apartment::Test.drop_schema(existing_schema_name)
+        end
+
+        it "should drop db" do
+          Apartment::Database.adapter.should_receive(:drop)
+          Apartment::Migrator.drop(existing_schema_name)
+        end
+      end
+
       describe "#migrate" do
         it "should connect to new db, then reset when done" do
           ActiveRecord::Base.connection.should_receive(:schema_search_path=).with(schema_name).once

@@ -47,6 +47,22 @@ describe "apartment rake tasks" do
       Company.delete_all
     end
 
+    describe "#create" do
+      it "should create all databases" do
+        Apartment::Migrator.should_receive(:create).exactly(company_count).times
+
+        @rake['apartment:create'].invoke
+      end
+    end
+
+    describe "#drop" do
+      it "should drop all databases" do
+        Apartment::Migrator.should_receive(:drop).exactly(company_count).times
+
+        @rake['apartment:drop'].invoke
+      end
+    end
+
     describe "#migrate" do
       it "should migrate all databases" do
         Apartment::Migrator.should_receive(:migrate).exactly(company_count).times
