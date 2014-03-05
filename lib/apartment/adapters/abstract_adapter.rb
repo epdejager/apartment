@@ -152,12 +152,14 @@ module Apartment
       #   Import the database schema
       #
       def import_database_schema(database = nil)
+        saved = ActiveRecord::Schema.verbose
         ActiveRecord::Schema.verbose = false    # do not log schema load output.
         if Rails.application.config.active_record.schema_format == :sql
           execute_or_abort("#{Rails.root}/db/structure.sql", database)
         else
           load_or_abort("#{Rails.root}/db/schema.rb")
         end
+        ActiveRecord::Schema.verbose = saved
       end
 
       #   Return a new config that is multi-tenanted
