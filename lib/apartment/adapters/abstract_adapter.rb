@@ -152,6 +152,7 @@ module Apartment
       #   Import the database schema
       #
       def import_database_schema(database = nil)
+        # save verbosity
         saved = ActiveRecord::Schema.verbose
         ActiveRecord::Schema.verbose = false    # do not log schema load output.
         if Rails.application.config.active_record.schema_format == :sql
