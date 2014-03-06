@@ -152,7 +152,7 @@ module Apartment
       #   Import the database schema
       #
       def import_database_schema(database = nil)
-        savecd = ActiveRecord::Schema.verbose 
+        saved = ActiveRecord::Schema.verbose 
         ActiveRecord::Schema.verbose  = false    # do not log schema load output.
         if Rails.application.config.active_record.schema_format == :sql
           execute_or_abort("#{Rails.root}/db/structure.sql", database)
